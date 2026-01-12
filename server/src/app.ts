@@ -10,9 +10,9 @@ app.use(cors({
 }))
 
 
-import userRoutes from "./routes/auth.route.js";
-import taskRoutes from "./routes/task.route.js";
-import { errorHandler } from "./utils/ApiError.js";
+import userRoutes from "./routes/auth.route.ts";
+import taskRoutes from "./routes/task.route.ts";
+import { errorHandler } from "./utils/ApiError.ts";
 
 
 app.use('/api/auth',userRoutes);

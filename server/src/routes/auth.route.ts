@@ -1,6 +1,6 @@
 import express from "express";
-import { refreshAccessToken, userLogin, userRegister } from "../controller/auth.controller.js";
-import { authmiddleware } from "../middleware/auth.middleware.js";
+import { refreshAccessToken, userLogin, userRegister } from "../controller/auth.controller.ts";
+import { authmiddleware } from "../middleware/auth.middleware.ts";
 
 const router = express.Router();
 
