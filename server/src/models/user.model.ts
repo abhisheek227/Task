@@ -3,15 +3,21 @@ import bcrypt from "bcrypt";
 import jwt  from "jsonwebtoken";
 
 enum Role {
-  admin="Admin",
-  user="User"
+  Admin="Admin",
+  User="User"
 }
 
-interface IUser extends Document {
+interface IUserMethods {
+  comparePassword(enteredPassword:string): Promise<boolean>
+  genrateAccessToken():string;
+  genrateRefreshToken():string;
+}
+
+interface IUser extends Document,IUserMethods {
   name:string;
   email:string;
   password:string;
-  tasks: Types.ObjectId;
+  tasks: Types.ObjectId[];
   role: Role;
   refreshToken: string;
 }
@@ -49,12 +55,12 @@ const userSchema = new mongoose.Schema<IUser>(
   { timestamps: true }
 );
 
-userSchema.pre("save", async function () {
+userSchema.pre<IUser>("save", async function () {
   if (!this.isModified("password")) return;
   this.password = await bcrypt.hash(this.password, 10);
 });
 
-userSchema.methods.comparePassword = async function (enteredPassword) {
+userSchema.methods.comparePassword = async function (enteredPassword:string) {
     return await bcrypt.compare(enteredPassword, this.password);
 };
 
