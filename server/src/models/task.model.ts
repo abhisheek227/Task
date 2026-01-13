@@ -1,34 +1,59 @@
 import mongoose from "mongoose";
 
-const taskSchema = mongoose.Schema({
+enum Status {
+  pending = "pending",
+  in_progress = "in_progress",
+  completed = "completed",
+}
+
+enum Priority {
+  low = "low",
+  medium = "medium",
+  high = "high",
+}
+
+interface ITask extends Document {
+  title: string;
+  description: string;
+  status: string | Status;
+  priority: Priority;
+  due_date?: Date;
+  user: Types.ObjectId;
+}
+
+const taskSchema = new mongoose.Schema<ITask>(
+  {
     title: {
-        type: String,
-        required: true
+      type: String,
+      required: true,
     },
     description: {
-        type:String
+      type: String,
     },
-    status : {
-        type: String,
-        enum: ["pending","in_progress","completed"],
-        default: "pending"
+    status: {
+      type: String,
+      enum: Object.values(Status),
+      default: Status.pending,
     },
     priority: {
-        type: String,
-        enum: ["low","medium","high"],
-        default: "low"
+      type: String,
+      enum: Object.values(Priority),
+      default: Priority.low,
     },
-    due_date:{
-        type: Date,
+    due_date: {
+      type: Date,
     },
-    user : {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User'
-    }
-},{
-    timestamps: true
-})
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
 
-const Task = mongoose.model('Task',taskSchema);
+const Task = mongoose.model<ITask>("Task", taskSchema);
 
 export default Task;
