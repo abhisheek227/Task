@@ -2,7 +2,21 @@ import mongoose from "mongoose";
 import bcrypt from "bcrypt";
 import jwt  from "jsonwebtoken";
 
-const userSchema = new mongoose.Schema(
+enum Role {
+  admin="Admin",
+  user="User"
+}
+
+interface IUser extends Document {
+  name:string;
+  email:string;
+  password:string;
+  tasks: Types.ObjectId;
+  role: Role;
+  refreshToken: string;
+}
+
+const userSchema = new mongoose.Schema<IUser>(
   {
     name: {
       type: String,
@@ -25,8 +39,8 @@ const userSchema = new mongoose.Schema(
     ],
     role: {
       type: String,
-      enum: ["Admin", "User"],
-      default: "User",
+      enum: Object.values(Role),
+      default: Role.admin,
     },
     refreshToken :{
       type:String
@@ -62,5 +76,5 @@ userSchema.methods.genrateRefreshToken =  function(){
     })
 }
 
-const User = mongoose.model("User", userSchema);
+const User = mongoose.model<IUser>("User", userSchema);
 export default User;
