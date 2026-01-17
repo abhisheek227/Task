@@ -1,69 +1,177 @@
-import React from 'react'
-import '../App.css'
-const Record = ({ data, onDelete, onEdit }) => {
+import React, { useState } from "react";
+import api from "../api/axios";
+import "../App.css";
 
-    const handleDelete = async (taskId) => {
-        if (!confirm("Are you sure you want to delete this task?")) return;
-        
+const Record = ({ data, onDelete }) => {
+    const [editRowId, setEditRowId] = useState(null);
+    const [editForm, setEditForm] = useState({
+        title: "",
+        description: "",
+        status: "",
+        priority: "",
+        due_date: "",
+    });
+
+    const startEdit = (task) => {
+        setEditRowId(task._id);
+        setEditForm({
+            title: task.title,
+            description: task.description,
+            status: task.status,
+            priority: task.priority,
+            due_date: task.due_date?.slice(0, 10),
+        });
+    };
+
+    const cancelEdit = () => {
+        setEditRowId(null);
+        setEditForm({
+            title: "",
+            description: "",
+            status: "",
+            priority: "",
+            due_date: "",
+        });
+    };
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setEditForm((prev) => ({ ...prev, [name]: value }));
+    };
+
+    const saveEdit = async (taskId) => {
         try {
-            const token = localStorage.getItem("accessToken");
+            const res = await api.put(`/api/task/${taskId}`, editForm);
 
-            const response = await fetch(`http://localhost:5000/api/task/${taskId}`, {
-                method: "DELETE",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
-                },
-            });
+            alert("Task updated successfully");
 
-            if (!response.ok) {
-                const responseData = await response.json();
-                alert(responseData.message || "Failed to delete task");
-                return;
-            }
-            if (onDelete) onDelete(taskId);
-            alert("Task deleted successfully!");
+            setEditRowId(null);
+            window.location.reload(); // simplest way (can optimize later)
         } catch (err) {
-            alert(err.message);
+            alert("Failed to update task");
         }
     };
 
-    const handleEdit = (task) => {
-        
-        if (onEdit) onEdit(task);
-    };
-
     return (
-        <div>
-            <table className="table border p-5 min-w-full" >
-                <thead>
-                    <tr>
-                        <th scope='col' className='w-1/7 items-center text-center p-1 m-3'>Title</th>
-                        <th scope='col' className='w-1/7 items-center text-center p-1 m-3'>Description</th>
-                        <th scope='col' className='w-1/7 items-center text-center p-1 m-3'>Status</th>
-                        <th scope='col' className='w-1/7 items-center text-center p-1 m-3'>Priority</th>
-                        <th scope='col' className='w-1/7 items-center text-center p-1 m-3'>Date</th>
-                        <th scope='col' className='w-1/7 items-center text-center p-1 m-3'>Delete</th>
-                        <th scope='col' className='w-1/7 items-center text-center p-1 m-3'>Edit</th>
+        <table className="table border min-w-full">
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Description</th>
+                    <th>Status</th>
+                    <th>Priority</th>
+                    <th>Date</th>
+                    <th>Delete</th>
+                    <th>Edit</th>
+                </tr>
+            </thead>
 
-                    </tr>
-                </thead>
-                <tbody>
-                    {data.map(item => (
+            <tbody>
+                {data.map((item) => {
+                    const isEditing = editRowId === item._id;
+
+                    return (
                         <tr key={item._id}>
-                            <td>{item.title} </td>
-                            <td>{item.description} </td>
-                            <td>{item.status} </td>
-                            <td>{item.priority} </td>
-                            <td>{new Date(item.due_date).toLocaleDateString()} </td>
-                            <td onClick={()=>handleDelete(item._id)} style={{cursor: 'pointer'}}>❌</td>
-                            <td onClick={()=>handleEdit(item)} style={{cursor: 'pointer'}}>✏️</td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
-        </div>
-    )
-}
+                            {/* TITLE */}
+                            <td>
+                                {isEditing ? (
+                                    <input
+                                        name="title"
+                                        value={editForm.title}
+                                        onChange={handleChange}
+                                        className="border px-2"
+                                    />
+                                ) : (
+                                    item.title
+                                )}
+                            </td>
 
-export default Record
+                            {/* DESCRIPTION */}
+                            <td>
+                                {isEditing ? (
+                                    <input
+                                        name="description"
+                                        value={editForm.description}
+                                        onChange={handleChange}
+                                        className="border px-2"
+                                    />
+                                ) : (
+                                    item.description
+                                )}
+                            </td>
+
+                            {/* STATUS */}
+                            <td>
+                                {isEditing ? (
+                                    <select
+                                        name="status"
+                                        value={editForm.status}
+                                        onChange={handleChange}
+                                    >
+                                        <option value="pending">Pending</option>
+                                        <option value="in_progress">In Progress</option>
+                                        <option value="completed">Completed</option>
+                                    </select>
+                                ) : (
+                                    item.status
+                                )}
+                            </td>
+
+                            {/* PRIORITY */}
+                            <td>
+                                {isEditing ? (
+                                    <select
+                                        name="priority"
+                                        value={editForm.priority}
+                                        onChange={handleChange}
+                                    >
+                                        <option value="low">Low</option>
+                                        <option value="medium">Medium</option>
+                                        <option value="high">High</option>
+                                    </select>
+                                ) : (
+                                    item.priority
+                                )}
+                            </td>
+
+                            {/* DATE */}
+                            <td>
+                                {isEditing ? (
+                                    <input
+                                        type="date"
+                                        name="due_date"
+                                        value={editForm.due_date}
+                                        onChange={handleChange}
+                                    />
+                                ) : (
+                                    new Date(item.due_date).toLocaleDateString()
+                                )}
+                            </td>
+
+                            {/* DELETE */}
+                            <td>
+                                {!isEditing && (
+                                    <button onClick={() => onDelete(item._id)}>❌</button>
+                                )}
+                            </td>
+
+                            {/* EDIT / SAVE */}
+                            <td>
+                                {isEditing ? (
+                                    <>
+                                        <button onClick={() => saveEdit(item._id)}>💾</button>
+                                        <button onClick={cancelEdit}>❌</button>
+                                    </>
+                                ) : (
+                                    <button onClick={() => startEdit(item)}>✏️</button>
+                                )}
+                            </td>
+                        </tr>
+                    );
+                })}
+            </tbody>
+        </table>
+    );
+};
+
+export default Record;
