@@ -1,13 +1,16 @@
+import { useState } from "react";
 import Header from "../components/Header";
 import TaskForm from "../components/TaskForm";
 import TaskItem from "../components/TaskItem";
 
 const Dashboard = () => {
+  const [refresh, setRefresh] = useState(0);
+
   return (
     <div className="bg-gray-100 min-h-screen">
       <Header />
-      <TaskItem />
-      <TaskForm />
+      <TaskItem refresh={refresh} />
+      <TaskForm onTaskCreated={() => setRefresh(r => r + 1)} />
     </div>
   );
 };
