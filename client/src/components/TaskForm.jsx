@@ -1,100 +1,84 @@
 import { useState } from "react";
+import api from "../api/axios";
 
-const TaskForm = () => {
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [status, setStatus] = useState("pending");
-  const [priority, setPriority] = useState("low");
-  const [dueDate, setDueDate] = useState("");
+const TaskForm = ({ onTaskCreated }) => {
+  const [form, setForm] = useState({
+    title: "",
+    description: "",
+    status: "pending",
+    priority: "low",
+    due_date: "",
+  });
+
+  const handleChange = (e) => {
+    setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
+  };
 
   const addTask = async (e) => {
     e.preventDefault();
-    if (!title) return;
-
-    const token = localStorage.getItem("accessToken");
-    if (!token) {
-      alert("Please login first");
-      return;
-    }
-
-    const taskData = {
-      title,
-      description,
-      status,
-      priority,
-      due_date: dueDate || null,
-    };
+    if (!form.title) return;
 
     try {
-      const response = await fetch("http://localhost:5000/api/task/", {
-        method: "POST",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(taskData),
+      await api.post("/api/task/", {
+        ...form,
+        due_date: form.due_date || null,
       });
 
-      const data = await response.json();
+      setForm({
+        title: "",
+        description: "",
+        status: "pending",
+        priority: "low",
+        due_date: "",
+      });
 
-      if (!response.ok) {
-        alert(data.message || "Failed to create task");
-        return;
-      }
-
-      alert("Task created successfully");
-      // Reset form
-      setTitle("");
-      setDescription("");
-      setStatus("pending");
-      setPriority("low");
-      setDueDate("");
-    } catch (error) {
-      alert("Error creating task");
+      onTaskCreated?.();
+    } catch {
+      alert("Failed to create task");
     }
   };
 
   return (
-    <div className="p-4 bg-white max-w-md mx-auto mt-6">
-      <form onSubmit={addTask}>
+    <div className="p-4 bg-white max-w-md mx-auto mt-6 rounded shadow">
+      <form onSubmit={addTask} className="space-y-2">
         <input
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          className="border p-2 w-full mb-2"
+          name="title"
+          value={form.title}
+          onChange={handleChange}
+          className="border p-2 w-full"
           placeholder="Task Title"
           required
         />
+
         <textarea
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          className="border p-2 w-full mb-2"
+          name="description"
+          value={form.description}
+          onChange={handleChange}
+          className="border p-2 w-full"
           placeholder="Description"
           rows="3"
         />
-        <select
-          value={status}
-          onChange={(e) => setStatus(e.target.value)}
-          className="border p-2 w-full mb-2"
-        >
+
+        <select name="status" value={form.status} onChange={handleChange} className="border p-2 w-full">
           <option value="pending">Pending</option>
           <option value="in_progress">In Progress</option>
           <option value="completed">Completed</option>
         </select>
-        <select
-          value={priority}
-          onChange={(e) => setPriority(e.target.value)}
-          className="border p-2 w-full mb-2"
-        >
+
+        <select name="priority" value={form.priority} onChange={handleChange} className="border p-2 w-full">
           <option value="low">Low</option>
           <option value="medium">Medium</option>
           <option value="high">High</option>
         </select>
+
         <input
           type="date"
-          value={dueDate}
-          onChange={(e) => setDueDate(e.target.value)}
-          className="border p-2 w-full mb-2"
+          name="due_date"
+          value={form.due_date}
+          onChange={handleChange}
+          className="border p-2 w-full"
         />
+
         <button className="bg-blue-500 text-white w-full p-2 rounded">
           Add Task
         </button>
