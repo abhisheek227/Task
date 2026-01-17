@@ -48,88 +48,80 @@ const createTask = async (req, res, next) => {
 };
 
 
-const getTask = async (req, res) => {
-    const taskId = req.params.id;
-    const userId = req.user._id;
+const getTask = async (req, res, next) => {
+    try {
+        const task = await Task.findOne({
+            _id: req.params.id,
+            user: req.user._id,
+        });
 
-    const user = await User.findOne({ _id: userId })
-    if (!user) {
-        return next(new ApiError(404, "User is not exist"));
+        if (!task) {
+            return next(new ApiError(404, "Task not found"));
+        }
+
+        res.status(200).json({
+            success: true,
+            task,
+        });
+    } catch (error) {
+        next(error);
     }
-
-    if (user.tasks.length === 0) {
-        return next(new ApiError(404, "Task not found for this user"))
-    }
-
-    const task = await Task.findById(taskId);
-
-    if (!task) {
-        // return res.status(404).json({ message: "Task does not exist" });
-        return next(new ApiError(404, "Task does not exist"))
-    }
-
-    res.status(200).json({
-        success: true,
-        msg: "Task found",
-        task
-    })
-}
+};
 
 const getAllTask = async (req, res, next) => {
-    const user = req.user._id;
+    try {
+        const userId = req.user._id;
 
-    const sortBy = req.query.sortBy || "";
-    const sortOrder = req.query.order === "asc" ? 1 : -1;
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
-    const fromDate = req.query.fromdate;
-    const toDate = req.query.todate;
-    const skip = (page - 1) * limit;
-    const priority = req.query.priority;
-    const search = req.query.search;
+        const {
+            sortBy = "createdAt",
+            order = "desc",
+            page = 1,
+            limit = 10,
+            fromdate,
+            todate,
+            priority,
+            status,
+            search
+        } = req.query;
 
+        const skip = (page - 1) * limit;
 
-    const filter = {
-        user: user,
-    }
+        const filter = { user: userId };
 
-    if (search) {
-        filter.title = { $regex: search, $options: "i" };
-    }
-
-    if (priority) {
-        filter.priority = priority
-    }
-
-    if (fromDate || toDate) {
-        filter.createdAt = {};
-
-        if (fromDate) {
-            filter.createdAt.$gte = new Date(fromDate);
+        if (search) {
+            filter.title = { $regex: search, $options: "i" };
         }
 
-        if (toDate) {
-            const endDate = new Date(toDate);
-            filter.createdAt.$lte = endDate;
+        if (priority) {
+            filter.priority = priority;
         }
+
+        if (status) {
+            filter.status = status;
+        }
+
+        if (fromdate || todate) {
+            filter.createdAt = {};
+            if (fromdate) filter.createdAt.$gte = new Date(fromdate);
+            if (todate) filter.createdAt.$lte = new Date(todate);
+        }
+
+        const tasks = await Task.find(filter)
+            .sort({ [sortBy]: order === "asc" ? 1 : -1 })
+            .skip(skip)
+            .limit(Number(limit));
+
+        res.status(200).json({
+            success: true,
+            data: tasks,
+            page: Number(page),
+            limit: Number(limit),
+        });
+    } catch (error) {
+        next(error);
     }
+};
 
-
-
-    const data = await Task.find(filter).sort({ [sortBy]: sortOrder })
-        .skip(skip)
-        .limit(limit);
-
-    res.status(200).json({
-        data,
-        success: true,
-        mes: 'Data is fetched',
-        page,
-        limit,
-        sortBy,
-        sortOrder: sortOrder === 1 ? "asc" : "desc",
-    })
-}
 
 
 const updateTask = async (req, res) => {
@@ -168,48 +160,98 @@ const updateTask = async (req, res) => {
     }
 };
 
-const deleteTask = async (req, res,next) => {
-    const id = req.user.id;
-    const userid = req.user._id
-    const user = await User.find(userid)
-    const isAdmin = user.role
-    if (isAdmin === "Admin") {
-        const delted = await Task.findByIdAndDelete(id)
-        if (!delted) {
-            res.status(400).json({
-                msg: "error while delteing "
-            })
-        }
+const deleteTask = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user._id);
 
-        res.status(200).json({
-            msg: "Delteted",
-            delted
-        })
-    }
-    else {
-        return next(new ApiError(400, "Only Admin can delete this "))
+    if (!user) {
+      return next(new ApiError(404, "User not found"));
     }
 
-}
-const searchTask = async (req, res) => {
-    try {
-        const search = req.query.search || "";
-        const skip = req.query.skip || 0;
-        const limit = req.query.limit || 10;
+    const task = await Task.findById(req.params.id);
 
-
-
-        const tasks = await Task.find({
-            title: { $regex: search, $options: "i" }
-        })
-            .sort({ createdAt: -1 })
-            .skip(skip)
-            .limit(limit);
-
-        res.json(tasks);
-    } catch (error) {
-        res.status(500).json({ message: "error" });
+    if (!task) {
+      return next(new ApiError(404, "Task not found"));
     }
+
+    // Admin can delete any task, user only their own
+    if (user.role !== "Admin" && task.user.toString() !== user._id.toString()) {
+      return next(new ApiError(403, "Not allowed"));
+    }
+
+    await Task.findByIdAndDelete(task._id);
+
+    res.status(200).json({
+      success: true,
+      msg: "Task deleted",
+    });
+  } catch (error) {
+    next(error);
+  }
 };
 
-export { createTask, getTask, getAllTask, updateTask, deleteTask, searchTask }
+const searchTask = async (req, res, next) => {
+  try {
+    const { search = "", page = 1, limit = 10 } = req.query;
+    const skip = (page - 1) * limit;
+
+    const tasks = await Task.find({
+      user: req.user._id,
+      title: { $regex: search, $options: "i" },
+    })
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(Number(limit));
+
+    res.status(200).json({
+      success: true,
+      data: tasks,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const getTaskStats = async (req, res, next) => {
+  try {
+    const userId = req.user._id;
+
+    const stats = await Task.aggregate([
+      { $match: { user: userId } },
+      {
+        $group: {
+          _id: "$status",
+          count: { $sum: 1 }
+        }
+      }
+    ]);
+
+    let total = 0;
+    let completed = 0;
+    let active = 0;
+
+    stats.forEach(item => {
+      total += item.count;
+
+      if (item._id === "completed") {
+        completed = item.count;
+      } else {
+        active += item.count;
+      }
+    });
+
+    res.status(200).json({
+      success: true,
+      stats: {
+        total,
+        active,
+        completed
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+
+export { createTask, getTask, getAllTask, updateTask, deleteTask, searchTask, getTaskStats }
