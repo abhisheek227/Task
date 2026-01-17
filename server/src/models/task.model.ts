@@ -15,7 +15,7 @@ enum Priority {
 interface ITask extends Document {
   title: string;
   description: string;
-  status: string | Status;
+  status: Status;
   priority: Priority;
   due_date?: Date;
   user: Types.ObjectId;

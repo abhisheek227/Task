@@ -1,9 +1,9 @@
 import jwt from "jsonwebtoken";
 import User from "../models/user.model.ts";
 
-const authmiddleware = async (req, res, next) => {
+const authmiddleware = async (req:Request, res:Response, next:NextFunction) => {
   try {
-    let token;
+    let token:string;
 
     if (req.cookies?.accessToken) {
       token = req.cookies.accessToken;

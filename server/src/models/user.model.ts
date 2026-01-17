@@ -1,22 +1,22 @@
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
-import jwt  from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 
 enum Role {
-  Admin="Admin",
-  User="User"
+  Admin = "Admin",
+  User = "User",
 }
 
 interface IUserMethods {
-  comparePassword(enteredPassword:string): Promise<boolean>
-  genrateAccessToken():string;
-  genrateRefreshToken():string;
+  comparePassword(enteredPassword: string): Promise<boolean>;
+  genrateAccessToken(): string;
+  genrateRefreshToken(): string;
 }
 
-interface IUser extends Document,IUserMethods {
-  name:string;
-  email:string;
-  password:string;
+interface IUser extends Document, IUserMethods {
+  name: string;
+  email: string;
+  password: string;
   tasks: Types.ObjectId[];
   role: Role;
   refreshToken: string;
@@ -48,9 +48,9 @@ const userSchema = new mongoose.Schema<IUser>(
       enum: Object.values(Role),
       default: Role.admin,
     },
-    refreshToken :{
-      type:String
-    }
+    refreshToken: {
+      type: String,
+    },
   },
   { timestamps: true }
 );
@@ -60,27 +60,35 @@ userSchema.pre<IUser>("save", async function () {
   this.password = await bcrypt.hash(this.password, 10);
 });
 
-userSchema.methods.comparePassword = async function (enteredPassword:string) {
-    return await bcrypt.compare(enteredPassword, this.password);
+userSchema.methods.comparePassword = async function (enteredPassword: string) {
+  return await bcrypt.compare(enteredPassword, this.password);
 };
 
-userSchema.methods.genrateAccessToken =  function(){
-    return jwt.sign({
-        _id:this._id,
-        name: this.name,
-        email:this.email
-    },process.env.ACCESS_TOCKEN,{
-        expiresIn:process.env.ACCESS_TOCKEN_EXPIREY
-    })
-}
+userSchema.methods.genrateAccessToken = function () {
+  return jwt.sign(
+    {
+      _id: this._id,
+      name: this.name,
+      email: this.email,
+    },
+    process.env.ACCESS_TOCKEN,
+    {
+      expiresIn: process.env.ACCESS_TOCKEN_EXPIREY,
+    }
+  );
+};
 
-userSchema.methods.genrateRefreshToken =  function(){
-    return jwt.sign({
-        _id:this._id
-    },process.env.REFRESH_TOKEN_KEY,{
-        expiresIn:process.env.REFRESH_TOKEN_EXPIRY
-    })
-}
+userSchema.methods.genrateRefreshToken = function () {
+  return jwt.sign(
+    {
+      _id: this._id,
+    },
+    process.env.REFRESH_TOKEN_KEY,
+    {
+      expiresIn: process.env.REFRESH_TOKEN_EXPIRY,
+    }
+  );
+};
 
 const User = mongoose.model<IUser>("User", userSchema);
 export default User;

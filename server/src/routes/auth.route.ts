@@ -12,7 +12,7 @@ router.route('/done').get(authmiddleware, (req, res) => {
         user: req.user,
     })
 })
-// router.route('/verify').get(authmiddleware,)
+router.route('/verify').get(authmiddleware)
 router.route('/refreshtoken').post(refreshAccessToken);
 
 export default router;
