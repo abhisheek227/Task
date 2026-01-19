@@ -102,8 +102,18 @@ const getAllTask = async (req, res, next) => {
 
     if (fromdate || todate) {
       filter.createdAt = {};
-      if (fromdate) filter.createdAt.$gte = new Date(fromdate);
-      if (todate) filter.createdAt.$lte = new Date(todate);
+
+      if (fromdate) {
+        const from = new Date(fromdate);
+        from.setHours(0, 0, 0, 0); // start of day
+        filter.createdAt.$gte = from;
+      }
+
+      if (todate) {
+        const to = new Date(todate);
+        to.setHours(23, 59, 59, 999); // end of day
+        filter.createdAt.$lte = to;
+      }
     }
 
     const totalTasks = await Task.countDocuments(filter);
