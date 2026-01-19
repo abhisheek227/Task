@@ -9,8 +9,8 @@ const Dashboard = () => {
   return (
     <div className="bg-gray-100 min-h-screen">
       <Header />
-      <TaskItem refresh={refresh} onTaskDelted={() => setRefresh(r => r + 1)} />
       <TaskForm onTaskCreated={() => setRefresh(r => r + 1)} />
+      <TaskItem refresh={refresh} onTaskDelted={() => setRefresh(r => r + 1)} />
     </div>
   );
 };
