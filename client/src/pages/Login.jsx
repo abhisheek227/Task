@@ -30,40 +30,45 @@ const Login = () => {
     login(data.email);
     localStorage.setItem("accessToken", data.accessToken);
     localStorage.setItem("refreshToken", data.refreshToken);
-    localStorage.setItem('user',data.email)
+    localStorage.setItem('user', data.email)
     navigate("/");
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen">
-      <form onSubmit={handleSubmit} className="bg-white p-6 rounded shadow w-96">
-        <h2 className="text-xl font-bold mb-4">Login</h2>
+    <div className="flex justify-center items-center min-h-screen bg-blue-900">
+      <form onSubmit={handleSubmit} className="bg-gray-100 w-[75%]  p-6 rounded-3xl shadow ">
+        <div className="text-3xl font-bold mb-6 text-center text-gray-900">
 
-        <input
-          type="email"
-          placeholder="Email"
-          required
-          className="border p-2 w-full mb-3"
-          onChange={(e) => setEmail(e.target.value)}
-        />
+          <div className="mb-6 ">
+            <span>Login</span>
+          </div>
+          <input
+            type="email"
+            placeholder="Email"
+            required
+            className="border p-2 w-full mb-3 rounded-2xl"
+            onChange={(e) => setEmail(e.target.value.trim())}
+          />
 
-        <input
-          type="password"
-          placeholder="Password"
-          required
-          className="border p-2 w-full mb-3"
-          onChange={(e) => setPassword(e.target.value)}
-        />
+          <input
+            type="password"
+            placeholder="Password"
 
-        <button className="w-full bg-blue-500 text-white p-2 rounded">
-          Login
-        </button>
+            required
+            className="border p-2 w-full mb-3 rounded-2xl"
+            onChange={(e) => setPassword(e.target.value)}
+          />
 
-        <p className="mt-3 text-center">
-          <Link to="/signup" className="text-blue-500">
-            Signup
-          </Link>
-        </p>
+          <button className="w-full bg-blue-500 text-white p-2 rounded">
+            Login
+          </button>
+
+          <p className="mt-3 text-center">
+            <Link to="/signup" className="text-blue-500">
+              Signup
+            </Link>
+          </p>
+        </div>
       </form>
     </div>
   );

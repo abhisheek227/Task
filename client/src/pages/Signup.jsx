@@ -23,28 +23,55 @@ const Signup = () => {
   if (redirect) return <Navigate to="/login" />;
 
   return (
-    <div className="flex justify-center items-center min-h-screen">
-      <form onSubmit={handleSubmit} className="bg-white p-6 rounded shadow w-96">
-        <h2 className="text-xl font-bold mb-4">Signup</h2>
-
+    <div className="flex justify-center items-center min-h-screen bg-blue-900">
+      <form onSubmit={handleSubmit} className="bg-gray-100 p-6 rounded shadow w-2xl flex flex-col justify-center ">
+       <div className="text-3xl font-bold mb-6 text-center justify-center-safe text-gray-900">
+         <h2 className="text-4xl font-bold mb-4">Signup</h2>
+       </div>
         <input
           placeholder="Name"
-          className="border p-2 w-full mb-3"
+          className="border p-2 w-full mb-3 rounded-2xl"
           onChange={(e) => setForm({ ...form, name: e.target.value })}
+          required
         />
 
         <input
           placeholder="Email"
-          className="border p-2 w-full mb-3"
+          className="border p-2 w-full mb-3 rounded-2xl"
           onChange={(e) => setForm({ ...form, email: e.target.value })}
         />
 
         <input
           type="password"
           placeholder="Password"
-          className="border p-2 w-full mb-3"
+          className="border p-2 w-full mb-3 rounded-2xl"
           onChange={(e) => setForm({ ...form, password: e.target.value })}
         />
+        {/* radio for admin user*/}
+        <div className="flex flex-row justify-center items-center ">
+          <label className="mr-4">
+            <input
+              type="radio"
+              name="role"
+              value="user"
+              checked={form.role === "user"}
+              onChange={(e) => setForm({ ...form, role: e.target.value })}
+              className="mr-2"
+            />
+            User
+          </label>
+          <label className="mr-4">
+            <input
+              type="radio"
+              name="role"
+              value="admin"
+              checked={form.role === "admin"}
+              onChange={(e) => setForm({ ...form, role: e.target.value })}
+              className="mr-2"
+            />
+            Admin
+          </label>
+        </div>
 
         <button className="w-full bg-blue-500 text-white p-2 rounded">
           Signup

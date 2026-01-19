@@ -1,28 +1,30 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AuthContext } from "./context";
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(() => {
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
     const savedUser = localStorage.getItem("user");
-    if (savedUser) {
-      try {
-        return JSON.parse(savedUser);
-      } catch {
-        localStorage.removeItem("user");
-        return null;
-      }
+    if (!savedUser) return;
+
+    try {
+      setUser(JSON.parse(savedUser));
+    } catch {
+      localStorage.removeItem("user");
     }
-    return null;
-  });
+  }, []);
 
   const login = (userData) => {
     if (!userData) return;
+
     setUser(userData);
     localStorage.setItem("user", JSON.stringify(userData));
   };
 
   const logout = () => {
     setUser(null);
+
     localStorage.removeItem("user");
     localStorage.removeItem("accessToken");
     localStorage.removeItem("refreshToken");
