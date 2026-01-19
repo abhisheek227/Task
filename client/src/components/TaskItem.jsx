@@ -3,9 +3,12 @@ import api from "../api/axios";
 import Record from "./Record";
 import Pegination from "./Pegination";
 
-const TaskItem = ({ refresh }) => {
+const TaskItem = ({ refresh, onTaskDelted }) => {
   const [tasks, setTasks] = useState([]);
+  const [totalTasks, setTotalTasks] = useState(0);
+
   const [stats, setStats] = useState({ total: 0, active: 0, completed: 0 });
+
   const [filters, setFilters] = useState({
     status: "",
     priority: "",
@@ -13,41 +16,48 @@ const TaskItem = ({ refresh }) => {
     todate: "",
     search: "",
   });
+
   const [debouncedSearch, setDebouncedSearch] = useState("");
 
-  // const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
-  const [recordsPerPage] = useState(3);
+  const recordsPerPage = 10;
+
 
   useEffect(() => {
-    const timer = setTimeout(() => setDebouncedSearch(filters.search), 400);
+    const timer = setTimeout(() => {
+      setDebouncedSearch(filters.search);
+      setCurrentPage(1);
+    }, 400);
+
     return () => clearTimeout(timer);
   }, [filters.search]);
+
 
   useEffect(() => {
     const fetchTasks = async () => {
       try {
         const query = Object.fromEntries(
-          Object.entries({ ...filters, search: debouncedSearch }).filter(
-            ([, v]) => v
-          )
+          Object.entries({
+            ...filters,
+            search: debouncedSearch,
+            page: currentPage,
+            limit: recordsPerPage,
+          }).filter(([, v]) => v)
         );
 
         const res = await api.get("/api/task", { params: query });
+
         setTasks(res.data.data || []);
+        setTotalTasks(res.data.total || 0);
       } catch (err) {
         console.error("Failed to fetch tasks", err);
       }
     };
 
     fetchTasks();
-  }, [filters, debouncedSearch, refresh]);
+  }, [filters, debouncedSearch, refresh, currentPage]);
 
-  const endIndex = currentPage * recordsPerPage;
-  const indexOfFirstRecord = endIndex - recordsPerPage;
-  const currentRecords = tasks.slice(indexOfFirstRecord, endIndex);
-  const nPages = Math.ceil(tasks.length / recordsPerPage)
-
+  
   useEffect(() => {
     const fetchStats = async () => {
       try {
@@ -61,25 +71,35 @@ const TaskItem = ({ refresh }) => {
     fetchStats();
   }, [refresh]);
 
+
+  const handleDelete = async (taskId) => {
+    await api.delete(`/api/task/${taskId}`);
+
+    if (tasks.length === 1 && currentPage > 1) {
+      setCurrentPage(prev => prev - 1);
+    } else {
+      onTaskDelted?.();
+    }
+  };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
+
+    if (name === "fromdate" || name === "todate") {
+      setFilters(prev => ({ ...prev, [name]: value }));
+      setCurrentPage(1);
+      return;
+    }
+
     setFilters(prev => ({ ...prev, [name]: value }));
+    setCurrentPage(1);
   };
 
-  const handleDelete = (taskId) => {
-    setTasks(prevTasks => prevTasks.filter(task => task._id !== taskId));
-  };
-
-  const handleEdit = (task) => {
-    // Scroll to TaskForm or open edit modal
-    // This can be expanded based on your needs
-    console.log("Editing task:", task);
-  };
+  const nPages = Math.ceil(totalTasks / recordsPerPage);
 
   return (
     <div className="p-6 bg-gray-100">
 
- 
       <div className="flex justify-center gap-6 mb-6">
         <Stat label="Total" value={stats.total} />
         <Stat label="Active" value={stats.active} color="text-blue-600" />
@@ -120,21 +140,25 @@ const TaskItem = ({ refresh }) => {
             <option value="high">High</option>
           </select>
         </div>
+
+        <div className="flex gap-4">
+          <input type="date" name="fromdate" value={filters.fromdate} onChange={handleChange} />
+          <input type="date" name="todate" value={filters.todate} onChange={handleChange} />
+        </div>
       </div>
 
-
-      <div className="space-y-3">
-        {tasks.length === 0 && (
-          <p className="text-center text-gray-500">No tasks found</p>
-        )}
-
-        <Record data={currentRecords} onDelete={handleDelete} onEdit={handleEdit} />
-        <Pegination
-          nPages={nPages}
-          currentPage={currentPage}
-          setCurrentPage={setCurrentPage}
-        />
-      </div>
+      {tasks.length === 0 ? (
+        <p className="text-center text-gray-500">No tasks found</p>
+      ) : (
+        <>
+          <Record data={tasks} onDelete={handleDelete} />
+          <Pegination
+            nPages={nPages}
+            currentPage={currentPage}
+            setCurrentPage={setCurrentPage}
+          />
+        </>
+      )}
     </div>
   );
 };

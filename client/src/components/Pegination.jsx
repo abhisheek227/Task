@@ -1,46 +1,41 @@
-import React from 'react'
+import React from "react";
 
 const Pegination = ({ nPages, currentPage, setCurrentPage }) => {
+  if (nPages <= 1) return null;
 
-    const pageNumbers = [...Array(nPages + 1).keys()].slice(1);
+  const pageNumbers = [...Array(nPages).keys()].map(n => n + 1);
 
-    const goToNextPage = () => {
-        if (currentPage !== nPages) setCurrentPage(currentPage + 1);
-    };
+  return (
+    <div className="flex justify-center mt-4">
+      <button
+        disabled={currentPage === 1}
+        onClick={() => setCurrentPage(p => p - 1)}
+        className="border px-3 py-1 mx-1 rounded disabled:opacity-50"
+      >
+        Prev
+      </button>
 
-    const goToPrevPage = () => {
-        if (currentPage !== 1) setCurrentPage(currentPage - 1);
-    };
-    return (
-        <div className='flex m-3 p-3 items-center justify-center flex-row'>
-            <nav className=''>
-                <ul className='flex flex-row m-2 justify-between min-w-full '>
-                    <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
-                        <button className="border rounded-2xl m-2 p-3" onClick={goToPrevPage}>
-                            Previous
-                        </button>
-                    </li>
+      {pageNumbers.map(num => (
+        <button
+          key={num}
+          onClick={() => setCurrentPage(num)}
+          className={`border px-3 py-1 mx-1 rounded ${
+            currentPage === num ? "bg-blue-500 text-white" : ""
+          }`}
+        >
+          {num}
+        </button>
+      ))}
 
-                    {pageNumbers.map(pgNumber => (
-                        <li
-                            key={pgNumber}
-                            className={`page-item ${currentPage === pgNumber ? 'active' : ''} `}
-                        >
-                            <button onClick={() => setCurrentPage(pgNumber)} className='m-2 p-3 border rounded-2xl'>
-                                {pgNumber}
-                            </button>
-                        </li>
-                    ))}
+      <button
+        disabled={currentPage === nPages}
+        onClick={() => setCurrentPage(p => p + 1)}
+        className="border px-3 py-1 mx-1 rounded disabled:opacity-50"
+      >
+        Next
+      </button>
+    </div>
+  );
+};
 
-                    <li className={`page-item ${currentPage === nPages ? 'disabled' : ''}`}>
-                        <button className="border rounded-2xl m-2 p-3" onClick={goToNextPage}>
-                            Next
-                        </button>
-                    </li>
-                </ul>
-            </nav>
-        </div>
-    )
-}
-
-export default Pegination
+export default Pegination;
