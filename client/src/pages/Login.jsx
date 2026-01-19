@@ -2,7 +2,6 @@ import { useContext, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/context";
 
-
 const Login = () => {
   const { login } = useContext(AuthContext);
   const navigate = useNavigate();
@@ -30,45 +29,55 @@ const Login = () => {
     login(data.email);
     localStorage.setItem("accessToken", data.accessToken);
     localStorage.setItem("refreshToken", data.refreshToken);
-    localStorage.setItem('user', data.email)
+    localStorage.setItem("user", data.email);
+
     navigate("/");
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-blue-900">
-      <form onSubmit={handleSubmit} className="bg-gray-100 w-[75%]  p-6 rounded-3xl shadow ">
-        <div className="text-3xl font-bold mb-6 text-center text-gray-900">
+    <div className="min-h-screen flex items-center justify-center bg-blue-900 px-4">
+      <form
+        onSubmit={handleSubmit}
+        className="w-full max-w-md bg-white rounded-2xl shadow-2xl p-8 space-y-6"
+      >
+        {/* Title */}
+        <h2 className="text-3xl font-extrabold text-center text-gray-800">
+          Login
+        </h2>
 
-          <div className="mb-6 ">
-            <span>Login</span>
-          </div>
-          <input
-            type="email"
-            placeholder="Email"
-            required
-            className="border p-2 w-full mb-3 rounded-2xl"
-            onChange={(e) => setEmail(e.target.value.trim())}
-          />
+        {/* Email */}
+        <input
+          type="email"
+          placeholder="Email"
+          required
+          className="w-full h-11 border rounded-xl px-4 focus:ring-2 focus:ring-blue-500 outline-none"
+          onChange={(e) => setEmail(e.target.value.trim())}
+        />
 
-          <input
-            type="password"
-            placeholder="Password"
+        {/* Password */}
+        <input
+          type="password"
+          placeholder="Password"
+          required
+          className="w-full h-11 border rounded-xl px-4 focus:ring-2 focus:ring-blue-500 outline-none"
+          onChange={(e) => setPassword(e.target.value)}
+        />
 
-            required
-            className="border p-2 w-full mb-3 rounded-2xl"
-            onChange={(e) => setPassword(e.target.value)}
-          />
+        {/* Button */}
+        <button
+          type="submit"
+          className="w-full bg-blue-600 hover:bg-blue-700 transition text-white font-semibold py-2.5 rounded-xl"
+        >
+          Login
+        </button>
 
-          <button className="w-full bg-blue-500 text-white p-2 rounded">
-            Login
-          </button>
-
-          <p className="mt-3 text-center">
-            <Link to="/signup" className="text-blue-500">
-              Signup
-            </Link>
-          </p>
-        </div>
+        {/* Footer */}
+        <p className="text-center text-sm text-gray-600">
+          Don’t have an account?{" "}
+          <Link to="/signup" className="text-blue-600 font-semibold hover:underline">
+            Signup
+          </Link>
+        </p>
       </form>
     </div>
   );

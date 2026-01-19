@@ -155,7 +155,7 @@ const Record = ({ data, onDelete }) => {
                       onClick={() => onDelete(item._id)}
                       className="text-red-500 hover:text-red-700 text-lg"
                     >
-                      ❌
+                      🗑️
                     </button>
                   )}
                 </td>

@@ -2,7 +2,12 @@ import { useState } from "react";
 import { Link, Navigate } from "react-router-dom";
 
 const Signup = () => {
-  const [form, setForm] = useState({ name: "", email: "", password: "" });
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    password: "",
+    role: "user",
+  });
   const [redirect, setRedirect] = useState(false);
 
   const handleSubmit = async (e) => {
@@ -23,62 +28,78 @@ const Signup = () => {
   if (redirect) return <Navigate to="/login" />;
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-blue-900">
-      <form onSubmit={handleSubmit} className="bg-gray-100 p-6 rounded shadow w-2xl flex flex-col justify-center ">
-       <div className="text-3xl font-bold mb-6 text-center justify-center-safe text-gray-900">
-         <h2 className="text-4xl font-bold mb-4">Signup</h2>
-       </div>
+    <div className="min-h-screen flex items-center justify-center bg-blue-900 px-4">
+      <form
+        onSubmit={handleSubmit}
+        className="w-full max-w-md bg-white rounded-2xl shadow-2xl p-8 space-y-5"
+      >
+     
+        <h2 className="text-3xl font-extrabold text-center text-gray-800">
+          Create Account
+        </h2>
+
+        
         <input
           placeholder="Name"
-          className="border p-2 w-full mb-3 rounded-2xl"
-          onChange={(e) => setForm({ ...form, name: e.target.value })}
           required
+          className="w-full h-11 border rounded-xl px-4 focus:ring-2 focus:ring-blue-500 outline-none"
+          onChange={(e) => setForm({ ...form, name: e.target.value })}
         />
 
         <input
+          type="email"
           placeholder="Email"
-          className="border p-2 w-full mb-3 rounded-2xl"
+          required
+          className="w-full h-11 border rounded-xl px-4 focus:ring-2 focus:ring-blue-500 outline-none"
           onChange={(e) => setForm({ ...form, email: e.target.value })}
         />
 
         <input
           type="password"
           placeholder="Password"
-          className="border p-2 w-full mb-3 rounded-2xl"
+          required
+          className="w-full h-11 border rounded-xl px-4 focus:ring-2 focus:ring-blue-500 outline-none"
           onChange={(e) => setForm({ ...form, password: e.target.value })}
         />
-        {/* radio for admin user*/}
-        <div className="flex flex-row justify-center items-center ">
-          <label className="mr-4">
+
+        <div className="flex justify-center gap-6 text-gray-700">
+          <label className="flex items-center gap-2 cursor-pointer">
             <input
               type="radio"
               name="role"
               value="user"
               checked={form.role === "user"}
               onChange={(e) => setForm({ ...form, role: e.target.value })}
-              className="mr-2"
+              className="accent-blue-600"
             />
             User
           </label>
-          <label className="mr-4">
+
+          <label className="flex items-center gap-2 cursor-pointer">
             <input
               type="radio"
               name="role"
               value="admin"
               checked={form.role === "admin"}
               onChange={(e) => setForm({ ...form, role: e.target.value })}
-              className="mr-2"
+              className="accent-blue-600"
             />
             Admin
           </label>
         </div>
 
-        <button className="w-full bg-blue-500 text-white p-2 rounded">
+        {/* Button */}
+        <button
+          type="submit"
+          className="w-full bg-blue-600 hover:bg-blue-700 transition text-white font-semibold py-2.5 rounded-xl"
+        >
           Signup
         </button>
 
-        <p className="mt-3 text-center">
-          <Link to="/login" className="text-blue-500">
+        {/* Footer */}
+        <p className="text-center text-sm text-gray-600">
+          Already have an account?{" "}
+          <Link to="/login" className="text-blue-600 font-semibold hover:underline">
             Login
           </Link>
         </p>

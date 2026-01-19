@@ -90,7 +90,7 @@ const TaskForm = ({ onTaskCreated , css}) => {
           required
         />
 
-        <button className="bg-blue-500 text-white w-full p-2 rounded">
+        <button className="bg-blue-500 text-white w-full p-2 rounded cursor-pointer hover:bg-blue-600 transition">
           Add Task
         </button>
       </form>

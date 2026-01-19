@@ -22,7 +22,6 @@ const Header = () => {
         {user && (
           <div className="flex items-center gap-4">
             
-            {/* User Name */}
             <div className="flex items-center gap-2">
               <div className="w-9 h-9 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold uppercase">
                 {user.name?.charAt(0)}
@@ -38,7 +37,7 @@ const Header = () => {
                 logout();
                 navigate("/login");
               }}
-              className="bg-red-500 hover:bg-red-600 transition text-white px-4 py-2 rounded-lg shadow-sm"
+              className="bg-red-500 hover:bg-red-600 transition text-white px-4 py-2 rounded-lg shadow-sm cursor-pointer"
             >
               Logout
             </button>
