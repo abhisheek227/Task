@@ -1,5 +1,6 @@
 import Task from "../models/task.model.js";
 import User from "../models/user.model.js";
+import { transporter } from "../services/mail.services.js";
 import { ApiError } from "../utils/ApiError.js";
 
 const createTask = async (req, res, next) => {
@@ -118,10 +119,12 @@ const getAllTask = async (req, res, next) => {
 
     const totalTasks = await Task.countDocuments(filter);
 
+
     const tasks = await Task.find(filter)
       .sort({ [sortBy]: order === "asc" ? 1 : -1 })
       .skip(skip)
-      .limit(Number(limit));
+      .limit(Number(limit))
+      .populate({ path: 'user', select: "-password -tasks -refreshToken -createdAt -updatedAt -_id " })
 
     res.status(200).json({
       success: true,
@@ -139,8 +142,9 @@ const getAllTask = async (req, res, next) => {
 
 const updateTask = async (req, res) => {
   try {
+    const userId = req.user._id;
     const { title, description, status, priority, due_date } = req.body;
-
+    console.log(userId);
     const updated = {};
 
     if (title !== undefined) updated.title = title;
@@ -148,7 +152,6 @@ const updateTask = async (req, res) => {
     if (status !== undefined) updated.status = status;
     if (priority !== undefined) updated.priority = priority;
     if (due_date !== undefined) updated.due_date = due_date;
-
     if (Object.keys(updated).length === 0) {
       return next(new ApiError(400, "No fields provided to update"))
     }
@@ -161,6 +164,24 @@ const updateTask = async (req, res) => {
 
     if (!task) {
       return res.status(404).json({ msg: "Task not found" });
+    }
+
+    const userData = await User.findById({ _id:userId }).select("-password -tasks -refreshToken -createdAt -updatedAt -_id")
+
+    if (status === "completed") {
+      await transporter.sendMail({
+        from: '"Abhishek Yadav" <abhixse.azord@gmail.com>',
+        to: 'abhisheek227@gmail.com',
+        subject: "Task Completed",
+        text: `Your task has completed ${task}`, // Plain-text version of the message
+        html: `
+          <h1>${task.title}</h1>
+          <p>${task.description}</p>
+          <p>${task.status}</p>
+          <p>${task.status}</p>
+          <p>${task.priority}</p>
+          `,
+      });
     }
 
     res.status(200).json({

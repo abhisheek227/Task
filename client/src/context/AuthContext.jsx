@@ -1,37 +1,29 @@
-import { useState, useEffect } from "react";
-import { AuthContext } from "./context";
+import { useState } from "react";
+import { AuthContext } from "./context.js";
+import useAuthCheck from "../hooks/useAuthCheck.jsx";
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const savedUser = localStorage.getItem("user");
-    if (!savedUser) return;
+  useAuthCheck(setUser, setLoading);
 
-    try {
-      setUser(JSON.parse(savedUser));
-    } catch {
-      localStorage.removeItem("user");
-    }
-  }, []);
 
   const login = (userData) => {
-    if (!userData) return;
-
     setUser(userData);
-    localStorage.setItem("user", JSON.stringify(userData));
   };
 
-  const logout = () => {
-    setUser(null);
+  const logout = async () => {
+    await fetch("http://localhost:5000/api/auth/logout", {
+      method: "POST",
+      credentials: "include",
+    });
 
-    localStorage.removeItem("user");
-    localStorage.removeItem("accessToken");
-    localStorage.removeItem("refreshToken");
+    setUser(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, logout, setLoading, setUser }}>
       {children}
     </AuthContext.Provider>
   );

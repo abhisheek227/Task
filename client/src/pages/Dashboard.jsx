@@ -1,7 +1,9 @@
-import { useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import Header from "../components/Header";
 import TaskForm from "../components/TaskForm";
 import TaskItem from "../components/TaskItem";
+import { AuthContext } from "../context/context";
+import useAuthCheck from "../hooks/useAuthCheck";
 
 const Dashboard = () => {
   const [refresh, setRefresh] = useState(0);
@@ -25,7 +27,7 @@ const Dashboard = () => {
         onTaskDelted={() => setRefresh(r => r + 1)}
       />
 
-      
+
       {todo && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-md"

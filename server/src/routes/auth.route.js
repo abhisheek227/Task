@@ -1,5 +1,5 @@
 import express from "express";
-import { refreshAccessToken, userLogin, userRegister } from "../controller/auth.controller.js";
+import { refreshAccessToken, userLogin, userLogout, userRegister } from "../controller/auth.controller.js";
 import { authmiddleware } from "../middleware/auth.middleware.js";
 
 const router = express.Router();
@@ -12,7 +12,8 @@ router.route('/done').get(authmiddleware, (req, res) => {
         user: req.user,
     })
 })
-// router.route('/verify').get(authmiddleware,)
+router.route('/verify').get(authmiddleware)
+router.route('/logout').post(userLogout)
 router.route('/refreshtoken').post(refreshAccessToken);
 
 export default router;
