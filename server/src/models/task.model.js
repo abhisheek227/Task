@@ -6,29 +6,40 @@ const taskSchema = mongoose.Schema({
         required: true
     },
     description: {
-        type:String
+        type: String
     },
-    status : {
+    status: {
         type: String,
-        enum: ["pending","in_progress","completed"],
+        enum: ["pending", "in_progress", "completed"],
         default: "pending"
     },
     priority: {
         type: String,
-        enum: ["low","medium","high"],
+        enum: ["low", "medium", "high"],
         default: "low"
     },
-    due_date:{
+    due_date: {
         type: Date,
     },
-    user : {
+    user: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
-    }
-},{
+    },
+    subtask: [
+        {
+            data: {
+                type: String
+            },
+            isCompleted: {
+                type: Boolean,
+                default: false
+            }
+        }
+    ]
+}, {
     timestamps: true
 })
 
-const Task = mongoose.model('Task',taskSchema);
+const Task = mongoose.model('Task', taskSchema);
 
 export default Task;

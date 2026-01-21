@@ -11,7 +11,7 @@ const createTask = async (req, res, next) => {
 
     const user_id = req.user._id;
 
-    let { title, description, status, priority, due_date } = req.body;
+    let { title, description, subtask ,status, priority, due_date } = req.body;
 
     if (!title) {
       return next(new ApiError(400, "Title is required"))
@@ -31,7 +31,8 @@ const createTask = async (req, res, next) => {
       status,
       priority,
       due_date,
-      user: user_id
+      user: user_id,
+      subtask
     });
 
     await User.findByIdAndUpdate(user_id, {
@@ -144,7 +145,6 @@ const updateTask = async (req, res) => {
   try {
     const userId = req.user._id;
     const { title, description, status, priority, due_date } = req.body;
-    console.log(userId);
     const updated = {};
 
     if (title !== undefined) updated.title = title;

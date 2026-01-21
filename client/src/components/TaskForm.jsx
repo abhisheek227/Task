@@ -39,6 +39,9 @@ const TaskForm = ({ onTaskCreated , css}) => {
         status: "pending",
         priority: "low",
         due_date: "",
+        subtask: {
+          
+        }
       });
 
       onTaskCreated?.();
