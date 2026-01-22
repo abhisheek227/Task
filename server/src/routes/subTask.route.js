@@ -35,6 +35,40 @@ router.route("/:subtaskId").put(async (req, res) => {
     }
 });
 
+router.post("/:taskId", async (req, res) => {
+  try {
+    const { taskId } = req.params;
+    const { subtask } = req.body;
+
+    if (!Array.isArray(subtask) || subtask.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Subtask array is required",
+      });
+    }
+
+    const formattedSubtasks = subtask.map(item => ({
+      data: item.data,
+      isCompleted: false,
+    }));
+
+    const task = await Task.findByIdAndUpdate(
+      taskId,
+      {
+        $push: { subtask: { $each: formattedSubtasks } },
+      },
+      { new: true }
+    );
+
+    res.status(201).json({
+      success: true,
+      message: "Subtasks added successfully",
+      data: task,
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
 
 
 export default router;
