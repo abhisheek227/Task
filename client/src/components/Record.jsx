@@ -82,7 +82,7 @@ const Record = ({ data, onDelete }) => {
                   className="border-t hover:bg-gray-50 cursor-pointer"
                 >
                   <td className="px-4 py-3" onClick={() => setSelectedTask(item)}>{i++}</td>
-                  <td className="px-4 py-3" onClick={() => setSelectedTask(item)}>
+                  <td className="px-4 py-3">
                     {isEditing ? (
                       <input
                         name="title"
