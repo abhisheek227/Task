@@ -207,9 +207,11 @@ const Record = ({ data, onDelete }) => {
         />
       )}
 
+      
       {selectedTask && (
         <CardSubTask
           data={selectedTask.subtask}
+          fileRedirect = {selectedTask.fileupload}
           onClose={() => setSelectedTask(null)}
         />
       )}

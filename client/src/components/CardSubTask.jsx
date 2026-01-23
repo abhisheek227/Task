@@ -1,9 +1,13 @@
 import { useState } from "react";
 import api from "../api/axios";
 
-const CardSubTask = ({ data = [], onClose }) => {
+const CardSubTask = ({ data = [], onClose, fileRedirect }) => {
     const [editRowId, setEditRowId] = useState(null);
     const [isCompleted, setIsCompleted] = useState(false);
+    const [fileRoute] = useState(fileRedirect);
+
+    console.log(fileRoute);
+
 
     const completedCount = data.filter(
         (subtask) => subtask.isCompleted
@@ -130,6 +134,18 @@ const CardSubTask = ({ data = [], onClose }) => {
                             </p>
                         </div> : ""}
 
+                    {fileRoute && (
+                        <a
+                            href={`http://localhost:5000/${fileRoute}`}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="bg-green-500 flex items-center justify-center rounded-3xl py-2 mt-3"
+                        >
+                            <span className="font-sans text-white font-semibold">
+                                View Attachment
+                            </span>
+                        </a>
+                    )}
 
                 </div>
             </div>

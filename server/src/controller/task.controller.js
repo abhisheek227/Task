@@ -295,4 +295,24 @@ const getTaskStats = async (req, res, next) => {
 };
 
 
-export { createTask, getTask, getAllTask, updateTask, deleteTask, searchTask, getTaskStats }
+const downloadFile = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const task = await Task.findById(id);
+
+    if (!task || !task.fileupload) {
+      return res.status(404).json({ message: "File not found" });
+    }
+
+    res.json({
+      file: `${process.env.BASE_URL}/${task.fileupload}`
+    });
+
+  } catch (err) {
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+
+export { createTask, getTask, getAllTask, updateTask, deleteTask, searchTask, getTaskStats,downloadFile }
