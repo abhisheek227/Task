@@ -2,16 +2,13 @@ import Task from "../models/task.model.js";
 import User from "../models/user.model.js";
 import { transporter } from "../services/mail.services.js";
 import { ApiError } from "../utils/ApiError.js";
+import { upload } from "../services/upload.services.js";
 
 const createTask = async (req, res, next) => {
   try {
-    if (!req.user || !req.user._id) {
-      throw new ApiError(401, "Unauthorized")
-    }
-
     const user_id = req.user._id;
 
-    let { title, description, subtask ,status, priority, due_date } = req.body;
+    let { title, description, subtask, status, priority, due_date } = req.body;
 
     if (!title) {
       return next(new ApiError(400, "Title is required"))
@@ -25,15 +22,21 @@ const createTask = async (req, res, next) => {
       priority = 'low';
     }
 
-    const task = await Task.create({
+    const newTask = {
       title,
       description,
       status,
       priority,
       due_date,
       user: user_id,
-      subtask
-    });
+      subtask,
+    }
+
+    if (req.file) {
+      newTask.fileupload = req.file.path;
+    }
+
+    const task = await Task.create(newTask);
 
     await User.findByIdAndUpdate(user_id, {
       $push: { tasks: task._id }
@@ -166,7 +169,7 @@ const updateTask = async (req, res) => {
       return res.status(404).json({ msg: "Task not found" });
     }
 
-    const userData = await User.findById({ _id:userId }).select("-password -tasks -refreshToken -createdAt -updatedAt -_id")
+    const userData = await User.findById({ _id: userId }).select("-password -tasks -refreshToken -createdAt -updatedAt -_id")
 
     if (status === "completed") {
       await transporter.sendMail({

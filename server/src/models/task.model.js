@@ -35,7 +35,10 @@ const taskSchema = mongoose.Schema({
                 default: false
             }
         }
-    ]
+    ],
+    fileupload: {
+        type:String
+    }
 }, {
     timestamps: true
 })
