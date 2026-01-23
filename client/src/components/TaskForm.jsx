@@ -11,10 +11,14 @@ const TaskForm = ({ onTaskCreated, css }) => {
     priority: "low",
     due_date: "",
     subtask: [],
+    attachment: null,
   });
+
   const handleChange = (e) => {
-    if (e.target.name === "due_date") {
-      const selectedDate = new Date(e.target.value);
+    const { name, value, files } = e.target;
+
+    if (name === "due_date") {
+      const selectedDate = new Date(value);
       const today = new Date();
       today.setHours(0, 0, 0, 0);
 
@@ -24,9 +28,17 @@ const TaskForm = ({ onTaskCreated, css }) => {
       }
     }
 
+    if (name === "attachment") {
+      setForm((prev) => ({
+        ...prev,
+        attachment: files[0],
+      }));
+      return;
+    }
+
     setForm((prev) => ({
       ...prev,
-      [e.target.name]: e.target.value,
+      [name]: value,
     }));
   };
 
@@ -60,9 +72,24 @@ const TaskForm = ({ onTaskCreated, css }) => {
     if (!form.title.trim()) return;
 
     try {
-      await api.post("/api/task", {
-        ...form,
-        due_date: form.due_date || Date.now(),
+      const formData = new FormData();
+
+      formData.append("title", form.title);
+      formData.append("description", form.description);
+      formData.append("status", form.status);
+      formData.append("priority", form.priority);
+      formData.append("due_date", form.due_date || Date.now());
+
+      formData.append("subtask", JSON.stringify(form.subtask));
+
+      if (form.attachment) {
+        formData.append("attachment", form.attachment);
+      }
+
+      await api.post("/api/task", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
       });
 
       setForm({
@@ -72,17 +99,24 @@ const TaskForm = ({ onTaskCreated, css }) => {
         priority: "low",
         due_date: "",
         subtask: [],
+        attachment: null,
       });
 
+      setSubtaskInput("");
       onTaskCreated?.();
-    } catch {
+    } catch (error) {
+      console.error(error);
       alert("Failed to create task");
     }
   };
 
   return (
     <div className={`p-4 bg-white max-w-md mx-auto mt-6 rounded shadow ${css}`}>
-      <form onSubmit={addTask} className="space-y-3">
+      <form
+        onSubmit={addTask}
+        className="space-y-3"
+        encType="multipart/form-data"
+      >
         <input
           name="title"
           value={form.title}
@@ -144,7 +178,7 @@ const TaskForm = ({ onTaskCreated, css }) => {
           <button
             type="button"
             onClick={addSubtask}
-            className="bg-green-500 text-white px-4 rounded hover:bg-green-600"
+            className="bg-green-500 text-white px-4 rounded"
           >
             +
           </button>
@@ -161,7 +195,7 @@ const TaskForm = ({ onTaskCreated, css }) => {
                 <button
                   type="button"
                   onClick={() => removeSubtask(index)}
-                  className="text-red-500 hover:text-red-700"
+                  className="text-red-500"
                 >
                   ✕
                 </button>
@@ -170,9 +204,16 @@ const TaskForm = ({ onTaskCreated, css }) => {
           </ul>
         )}
 
+        <input
+          type="file"
+          name="attachment"
+          onChange={handleChange}
+          className="border p-2 w-full"
+        />
+
         <button
           type="submit"
-          className="bg-blue-500 text-white w-full p-2 rounded hover:bg-blue-600 transition"
+          className="bg-blue-500 text-white w-full p-2 rounded"
         >
           Add Task
         </button>

@@ -14,6 +14,10 @@ const createTask = async (req, res, next) => {
       return next(new ApiError(400, "Title is required"))
     }
 
+    if (subtask) {
+      subtask = JSON.parse(subtask);
+    }
+
     if (!['pending', 'in_progress', 'completed'].includes(status)) {
       status = 'pending';
     }
