@@ -26,7 +26,12 @@ const Login = () => {
       return;
     }
 
-    login({ email: data.email });
+    
+    login(
+      { email: data.email, name: data.name || "" }, 
+      data.accessToken, 
+      data.refreshToken
+    );
     navigate("/");
   };
 

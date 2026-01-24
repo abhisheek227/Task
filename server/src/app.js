@@ -1,6 +1,7 @@
 import express from "express"
 import cors from 'cors'
 import cookieParser from 'cookie-parser'
+import path from "path";
 const app = express();
 
 app.use(express.json())
@@ -21,6 +22,8 @@ import { errorHandler } from "./utils/ApiError.js";
 app.use('/api/auth', userRoutes);
 app.use('/api/task', taskRoutes);
 app.use('/api/subTask', subTaskRoute);
+app.use("/uploads", express.static(path.join(import.meta.dirname, '../uploads')));
+
 app.use(errorHandler)
 
 export { app }

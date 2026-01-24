@@ -136,7 +136,7 @@ const CardSubTask = ({ data = [], onClose, fileRedirect }) => {
 
                     {fileRoute && (
                         <a
-                            href={`http://localhost:5000/${fileRoute}`}
+                            href={`http://localhost:5000/${fileRoute.replace(/\\/g,"/")}`}
                             target="_blank"
                             rel="noreferrer"
                             className="bg-green-500 flex items-center justify-center rounded-3xl py-2 mt-3"
