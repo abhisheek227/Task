@@ -1,7 +1,8 @@
 import { useState } from "react";
 import api from "../api/axios";
+import ShowError from "./ShowError";
 
-const TaskForm = ({ onTaskCreated, css }) => {
+const TaskForm = ({ onTaskAdded, css }) => {
   const [subtaskInput, setSubtaskInput] = useState("");
 
   const [form, setForm] = useState({
@@ -13,6 +14,9 @@ const TaskForm = ({ onTaskCreated, css }) => {
     subtask: [],
     attachment: null,
   });
+
+
+  const [getError, setGetError] = useState(null);
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
@@ -92,6 +96,8 @@ const TaskForm = ({ onTaskCreated, css }) => {
         },
       });
 
+      
+
       setForm({
         title: "",
         description: "",
@@ -103,15 +109,16 @@ const TaskForm = ({ onTaskCreated, css }) => {
       });
 
       setSubtaskInput("");
-      onTaskCreated?.();
+      onTaskAdded?.();
     } catch (error) {
       console.error(error);
-      alert("Failed to create task");
+       setGetError(error.msg || "Failed to create task");
     }
   };
 
   return (
     <div className={`p-4 bg-white max-w-md mx-auto mt-6 rounded shadow ${css}`}>
+      {getError ? <ShowError data={getError} /> : ""}
       <form
         onSubmit={addTask}
         className="space-y-3"

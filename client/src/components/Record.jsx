@@ -104,7 +104,7 @@ const Record = ({ data, onDelete }) => {
                         className="table-input"
                       />
                     ) : (
-                      <span className="text-gray-600">{item.description}</span>
+                      <span className="text-gray-600">{item.description.length > 0 ?  item.description: "------"}</span>
                     )}
                   </td>
                   <td className="px-4 py-3">
