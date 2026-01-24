@@ -1,13 +1,15 @@
 import { useContext, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/context";
+import ShowError from "../components/ShowError";
 
 const Login = () => {
   const { login } = useContext(AuthContext);
   const navigate = useNavigate();
 
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");  
+  const [password, setPassword] = useState("");
+  const [getError, setGetError] = useState(null);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -22,14 +24,14 @@ const Login = () => {
     const data = await res.json();
 
     if (!res.ok) {
-      alert(data.msg || "Login failed");
+      setGetError(data.msg || "Login failed");
       return;
     }
 
-    
+
     login(
-      { email: data.email, name: data.name || "" }, 
-      data.accessToken, 
+      { email: data.email, name: data.name || "" },
+      data.accessToken,
       data.refreshToken
     );
     navigate("/");
@@ -41,6 +43,7 @@ const Login = () => {
         onSubmit={handleSubmit}
         className="w-full max-w-md bg-white rounded-2xl shadow-2xl p-8 space-y-6"
       >
+        {getError ? <ShowError data={getError} /> : ""}
         <h2 className="text-3xl font-extrabold text-center text-gray-800">
           Login
         </h2>

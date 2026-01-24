@@ -9,7 +9,6 @@ const useAuthCheck = (setUser, setLoading) => {
 
     const fetchUser = async () => {
       try {
-        // Check if tokens exist in localStorage
         const accessToken = localStorage.getItem("accessToken");
         const refreshToken = localStorage.getItem("refreshToken");
 

@@ -1,13 +1,12 @@
-import { useContext, useEffect, useState } from "react";
+import { useState } from "react";
 import Header from "../components/Header";
 import TaskForm from "../components/TaskForm";
 import TaskItem from "../components/TaskItem";
-import { AuthContext } from "../context/context";
-import useAuthCheck from "../hooks/useAuthCheck";
 
 const Dashboard = () => {
   const [refresh, setRefresh] = useState(0);
   const [todo, setTodo] = useState(false);
+
 
   return (
     <div className="bg-blue-900 min-h-screen relative">
